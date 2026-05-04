@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Wand2, Loader2, Send, Edit, CheckSquare, X } from "lucide-react";
+import { Loader2, Send, Edit, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { base44 } from "@/api/base44Client";
@@ -15,54 +14,17 @@ export default function SolutionRefinementStep({ sessionData, onNext }) {
     const [finalText, setFinalText] = useState(sessionData.agreed_solution || "");
 
     useEffect(() => {
-        if (!originalSuggestion) {
-            generateInitialSuggestion();
+        if (!sessionData.agreed_solution) {
+            generateDetailedSuggestion();
         }
     }, []);
-
-    const generateInitialSuggestion = async () => {
-        setIsLoading(true);
-        const prompt = `
-            בהתבסס על הגדרת הבעיה החינוכית ומסגרת הפדגוגית הבאות, אנא צור סיכום קצר והצעות לשיפור בעברית:
-
-            הגדרת הבעיה:
-            - האתגר החינוכי: ${sessionData.educational_challenge}
-            - קהל היעד: ${sessionData.target_audience}
-            - למי כואב: ${sessionData.pain_point_users}
-            - גורמי הבעיה: ${sessionData.problem_causes}
-            - סימפטומים: ${sessionData.problem_symptoms}
-            - הנחות יסוד: ${sessionData.assumptions}
-            - כיוון הפתרון: ${sessionData.activity_idea}
-            
-            מסגרת פדגוגית:
-            - ${sessionData.pedagogical_framework}
-
-            ארגן את התשובה כך:
-            ### סיכום הבעיה
-            [סיכום קצר של הבעיה המוגדרת]
-
-            ### הצעות לשיפור
-            [2-3 הצעות קונקרטיות לשיפור הפתרון, תוך התחשבות במסגרת הפדגוגית]
-        `;
-
-        try {
-            const response = await base44.integrations.Core.InvokeLLM({ prompt });
-            setOriginalSuggestion(response);
-        } catch (error) {
-            console.error("Error generating AI suggestion:", error);
-            setOriginalSuggestion("שגיאה ביצירת הצעה. תוכלו לנסח את הפתרון בעצמכם.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     const generateDetailedSuggestion = async () => {
         setIsLoading(true);
         const prompt = `
-            בהתבסס על הגדרת הבעיה החינוכית ומסגרת פדגוגית הבאות, אנא צור הגדרת בעיה והצעת פתרון מפורטת ומקצועית בעברית:
+            בהתבסס על האתגר וכיוון הפתרון הבאים, אנא צור הגדרת בעיה והצעת פתרון מפורטת ומקצועית בעברית:
 
-            הגדרת הבעיה:
-            - האתגר החינוכי: ${sessionData.educational_challenge}
+            - האתגר: ${sessionData.educational_challenge}
             - קהל היעד: ${sessionData.target_audience}
             - למי כואב: ${sessionData.pain_point_users}
             - גורמי הבעיה: ${sessionData.problem_causes}
@@ -70,15 +32,12 @@ export default function SolutionRefinementStep({ sessionData, onNext }) {
             - הנחות יסוד: ${sessionData.assumptions}
             - כיוון הפתרון: ${sessionData.activity_idea}
 
-            מסגרת פדגוגית:
-            - ${sessionData.pedagogical_framework}
-
             ארגן את התשובה כך:
-            ### הגדרת הבעיה החינוכית
-            [ניסוח ברור ומקצועי של הבעיה, תוך שילוב המסגרת הפדגוגית]
+            ### הגדרת הבעיה
+            [ניסוח ברור ומקצועי של הבעיה]
 
             ### הצעת פתרון טכנולוגי
-            [תיאור הפתרון המוצע עם דגש על היתכנות ויעילות, ובאופן התואם את העקרונות הפדגוגיים]
+            [תיאור הפתרון המוצע עם דגש על היתכנות ויעילות]
 
             ### יתרונות הפתרון
             [רשימת יתרונות מרכזיים]
@@ -91,19 +50,11 @@ export default function SolutionRefinementStep({ sessionData, onNext }) {
             setShowDetailedForm(true);
         } catch (error) {
             console.error("Error generating detailed suggestion:", error);
-            setDetailedSuggestion("שגיאה ביצירת הצעה מפורטת.");
             setFinalText("שגיאה ביצירת הצעה מפורטת.");
             setShowDetailedForm(true);
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const handleUseSimple = () => {
-        // Extract only the summary part (before "הצעות לשיפור")
-        const summaryOnly = originalSuggestion.split("### הצעות לשיפור")[0].trim();
-        setFinalText(summaryOnly);
-        handleNext(summaryOnly);
     };
 
     const handleNext = (text = finalText) => {
@@ -165,45 +116,5 @@ export default function SolutionRefinementStep({ sessionData, onNext }) {
         );
     }
 
-    return (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            <ChatMessage message="ניתוח מעולה של האתגר! הנה סיכום והצעות לשיפור:" isBot={true} />
-
-            <div className="bg-sky-50 rounded-lg p-4 border">
-                <h3 className="font-semibold text-cet-text-primary mb-3 flex items-center gap-2">
-                    <Wand2 className="w-5 h-5 text-cet-primary-blue" />
-                    ניסוח הבעיה והצעות לשיפור
-                </h3>
-                <div className="bg-white rounded-lg p-4 whitespace-pre-wrap text-sm">
-                    {originalSuggestion || "טוען..."}
-                </div>
-            </div>
-
-            <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-                <p className="text-cet-text-primary mb-4 font-medium">
-                    רוצים שאנסח הגדרת בעיה והצעה לפתרון משופרת ומפורטת יותר?
-                </p>
-                <div className="flex justify-center gap-3">
-                    <Button 
-                        onClick={generateDetailedSuggestion}
-                        size="lg" 
-                        variant="outline" 
-                        className="bg-white border-2 border-green-600 text-green-600 hover:bg-green-50 text-lg font-bold"
-                    >
-                        <CheckSquare className="w-5 h-5 ml-2" />
-                        כן, צרו ניסוח מפורט
-                    </Button>
-                    <Button 
-                        onClick={handleUseSimple}
-                        size="lg" 
-                        variant="outline"
-                        className="bg-white border-2 border-cet-secondary-blue text-cet-secondary-blue hover:bg-cet-light-blue hover:text-cet-primary-blue hover:border-cet-primary-blue text-lg font-bold"
-                    >
-                        <Send className="w-5 h-5 ml-2" />
-                        לא, נמשיך עם הסיכום הנוכחי
-                    </Button>
-                </div>
-            </div>
-        </motion.div>
-    );
+    return null;
 }
