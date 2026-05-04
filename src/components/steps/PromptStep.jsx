@@ -129,11 +129,23 @@ Output ONLY the Hebrew mini-PRD. No extra commentary.
             >
               <Rocket className="w-16 h-16 text-blue-600 mx-auto mb-4" />
               <h3 className="text-2xl font-extrabold text-gray-800 mb-3">מוכנים לשיגור! 🚀</h3>
-              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                הפרומפט מוכן ומועתק! עכשיו הדביקו אותו ב-
-                <span className="font-bold text-blue-600"> base44.com </span>
-                ותתחילו לבנות את האפליקציה שלכם.
+              <p className="text-gray-600 text-lg mb-4 leading-relaxed">
+                הפרומפט מוכן ומועתק! עכשיו הדביקו אותו בכלי הוייבקוד שמתאים לכם:
               </p>
+              <div className="flex flex-col gap-2 text-right mb-6">
+                <a href="https://base44.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold transition-colors">
+                  <span>🔷</span> Base44
+                </a>
+                <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-700 font-semibold transition-colors">
+                  <span>💗</span> Lovable
+                </a>
+                <a href="https://bolt.new" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-semibold transition-colors">
+                  <span>⚡</span> Bolt.new
+                </a>
+                <a href="https://v0.dev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold transition-colors">
+                  <span>🤍</span> v0 by Vercel
+                </a>
+              </div>
               <Button
                 onClick={() => setShowSuccess(false)}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-xl w-full"
