@@ -63,7 +63,7 @@ export default function ProblemDefinitionStep({ onNext, isLoading, defaultValues
                 <FormSection
                     icon={<Edit3 className="w-5 h-5 text-cet-primary-blue" />}
                     title="א. אתגר חינוכי / אתגר שמעסיק אתכם"
-                    description="תארו קושי/אתגר/כאב מעולם ההוראה והלמידה (גם אם אינו חינוכי במובן הצר - כל אתגר שמעסיק אתכם כמחנכים)."
+                    description="תארו קושי, אתגר או כאב מתחום החינוך והלמידה — יכול להיות אתגר של מורה, של תלמיד, או כל אתגר שמעסיק אתכם."
                     value={formData.educational_challenge}
                     onChange={(e) => handleInputChange('educational_challenge', e.target.value)}
                     placeholder="למשל: קושי של תלמידים להתמיד בקריאת ספרים לאורך זמן."

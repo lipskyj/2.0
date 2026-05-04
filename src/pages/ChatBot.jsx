@@ -6,17 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Undo2, RefreshCw, Loader2, ChevronRight, Shield } from "lucide-react";
 
 import WelcomeStep from "../components/steps/WelcomeStep";
-import FamilyInfoStep from "../components/steps/FamilyInfoStep";
 import ProblemDefinitionStep from "../components/steps/ProblemDefinitionStep";
 import ActivityIdeaStep from "../components/steps/ActivityIdeaStep";
 import SolutionRefinementStep from "../components/steps/SolutionRefinementStep";
 import ActivityDescriptionStep from "../components/steps/ActivityDescriptionStep";
 import PromptStep from "../components/steps/PromptStep";
-import FinalStep from "../components/steps/FinalStep";
 
-// Step order: skip internal step 4 (PedagogicalFramework)
-const STEP_ORDER = [1, 2, 3, 5, 6, 7, 8, 9];
-const MAIN_STEPS = [1, 2, 3, 5, 6, 7]; // "מאתגר לפיתרון"
+// Step order: 1→3→5→6→7→8 (no step 2, no step 9)
+const STEP_ORDER = [1, 3, 5, 6, 7, 8];
+const MAIN_STEPS = [1, 3, 5, 6, 7]; // "מאתגר לפיתרון"
 
 const getNextStep = (step) => {
   const idx = STEP_ORDER.indexOf(step);
@@ -54,10 +52,10 @@ export default function ChatBot() {
     try {
       const user = await User.me();
       setCurrentUser(user);
-      await loadOrCreateSessionForUser(user.email);
+      await createNewSession(user.email);
     } catch (error) {
       setCurrentUser({ full_name: "אורח/ת", email: "anonymous" });
-      await loadOrCreateSessionForAnonymous();
+      await createNewSession('anonymous');
     }
     setIsLoading(false);
   };
@@ -65,7 +63,6 @@ export default function ChatBot() {
   const createNewSession = async (userEmail) => {
     const newSessionData = {
       step: 1,
-      family_name: "", family_location: "", family_info: "",
       educational_challenge: "", target_audience: "",
       pain_point_users: "", problem_causes: "", problem_symptoms: "",
       assumptions: "", pedagogical_framework: "",
@@ -77,19 +74,7 @@ export default function ChatBot() {
     setSessionData(created);
     setCurrentStep(1);
     setSessionId(created.id);
-    if (userEmail === 'anonymous') {
-      localStorage.setItem('chatSessionId', created.id);
-    }
     return created;
-  };
-
-  const loadOrCreateSessionForUser = async (userEmail) => {
-    await createNewSession(userEmail);
-  };
-
-  const loadOrCreateSessionForAnonymous = async () => {
-    localStorage.removeItem('chatSessionId');
-    await createNewSession('anonymous');
   };
 
   const createPageUrl = (path) => `/${path}`;
@@ -100,7 +85,7 @@ export default function ChatBot() {
       const session = await ChatSession.get(id);
       if (session) {
         setSessionData(session);
-        const step = session.step === 4 ? 5 : session.step;
+        const step = STEP_ORDER.includes(session.step) ? session.step : 1;
         setCurrentStep(step);
         setSessionId(session.id);
         try {
@@ -130,10 +115,16 @@ export default function ChatBot() {
   const handleStepComplete = async (stepData, nextStep) => {
     setIsLoading(true);
     const updates = { step: nextStep, ...stepData };
-    if (nextStep > 9) updates.is_complete = true;
     await updateSession(updates);
     setCurrentStep(nextStep);
     setIsLoading(false);
+  };
+
+  const handleSavePrompt = async (prompt) => {
+    if (!sessionId || !sessionData) return;
+    const updatedData = { ...sessionData, final_prompt: prompt, is_complete: true };
+    await ChatSession.update(sessionId, updatedData);
+    setSessionData(updatedData);
   };
 
   const handleGoBack = async () => {
@@ -162,14 +153,12 @@ export default function ChatBot() {
     if (isAdminMode || !sessionData) return true;
     switch (currentStep) {
       case 1: return true;
-      case 2: return !!(sessionData.family_name?.trim() && sessionData.family_location?.trim() && sessionData.family_info?.trim());
       case 3: return !!(sessionData.educational_challenge?.trim() && sessionData.target_audience?.trim() &&
                         sessionData.pain_point_users?.trim() && sessionData.problem_causes?.trim() &&
                         sessionData.problem_symptoms?.trim() && sessionData.assumptions?.trim());
       case 5: return !!sessionData.activity_idea?.trim();
       case 6: return !!sessionData.agreed_solution?.trim();
       case 7: return !!sessionData.activity_description?.trim();
-      case 8: return !!sessionData.final_prompt?.trim();
       default: return false;
     }
   };
@@ -178,9 +167,6 @@ export default function ChatBot() {
     if (isLoading) return;
     if (window.confirm("האם אתם בטוחים שברצונכם להתחיל מחדש? כל המידע שלכם יימחק.")) {
       setIsLoading(true);
-      if (sessionId && currentUser?.email === 'anonymous') {
-        localStorage.removeItem('chatSessionId');
-      }
       setSessionId(null);
       setSessionData(null);
       await initializeUserAndSession();
@@ -198,18 +184,7 @@ export default function ChatBot() {
 
     switch (currentStep) {
       case 1:
-        return <WelcomeStep onNext={() => handleStepComplete({}, 2)} />;
-
-      case 2:
-        return (
-          <FamilyInfoStep
-            onNext={(familyData) => handleStepComplete(familyData, 3)}
-            isLoading={isLoading}
-            defaultValue={sessionData.family_info}
-            defaultFamilyName={sessionData.family_name}
-            defaultLocation={sessionData.family_location}
-          />
-        );
+        return <WelcomeStep onNext={() => handleStepComplete({}, 3)} />;
 
       case 3:
         return (
@@ -256,26 +231,20 @@ export default function ChatBot() {
         );
 
       case 8:
+      default:
         return (
           <PromptStep
-            onNext={(prompt) => handleStepComplete({ final_prompt: prompt }, 9)}
-            familyInfo={`${sessionData.family_name} מ${sessionData.family_location} - ${sessionData.family_info}`}
+            onSave={handleSavePrompt}
             activityIdea={sessionData.agreed_solution}
             activityDescription={sessionData.activity_description}
-            isLoading={isLoading}
             defaultValue={sessionData.final_prompt}
           />
         );
-
-      case 9:
-      default:
-        return <FinalStep sessionData={sessionData} />;
     }
   };
 
   const isMainSection = MAIN_STEPS.includes(currentStep);
   const isPromptSection = currentStep === 8;
-  const isFinalSection = currentStep === 9;
 
   return (
     <div className="min-h-screen bg-sky-50" dir="rtl">
@@ -297,7 +266,7 @@ export default function ChatBot() {
                     <span>חזרו</span>
                   </Button>
                 )}
-                {currentStep < 9 && sessionData && checkCanGoForward() && (
+                {isMainSection && sessionData && checkCanGoForward() && (
                   <Button variant="outline" size="sm" onClick={handleGoForward} disabled={isLoading} className="flex items-center gap-2">
                     <ChevronRight className="w-4 h-4" />
                     <span>הבא</span>
@@ -331,14 +300,7 @@ export default function ChatBot() {
                 {isPromptSection && (
                   <div className="flex flex-col items-end gap-2">
                     <span className="text-xs font-semibold text-gray-700">פרומפט סופי</span>
-                    <div className="w-16 h-8 rounded-full flex items-center justify-center text-sm font-semibold bg-orange-500 text-white">7</div>
-                  </div>
-                )}
-
-                {isFinalSection && (
-                  <div className="flex flex-col items-end gap-2">
-                    <span className="text-xs font-semibold text-gray-700">מוכנים לשיגור</span>
-                    <div className="w-16 h-8 rounded-full flex items-center justify-center text-sm font-semibold bg-green-500 text-white">8</div>
+                    <div className="w-16 h-8 rounded-full flex items-center justify-center text-sm font-semibold bg-orange-500 text-white">✨</div>
                   </div>
                 )}
               </div>
