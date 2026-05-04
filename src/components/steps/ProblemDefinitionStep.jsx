@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Edit3, UserCheck, AlertTriangle, Search, CheckSquare, Users } from "lucide-react";
@@ -63,8 +62,8 @@ export default function ProblemDefinitionStep({ onNext, isLoading, defaultValues
             <div className="space-y-6 bg-white p-6 rounded-lg border">
                 <FormSection
                     icon={<Edit3 className="w-5 h-5 text-cet-primary-blue" />}
-                    title="א. האתגר החינוכי"
-                    description="תארו קושי/אתגר/כאב מעולם ההוראה והלמידה (כזה שניתן לדמיין פתרון טכנולוגי פשוט)."
+                    title="א. אתגר חינוכי / אתגר שמעסיק אתכם"
+                    description="תארו קושי/אתגר/כאב מעולם ההוראה והלמידה (גם אם אינו חינוכי במובן הצר - כל אתגר שמעסיק אתכם כמחנכים)."
                     value={formData.educational_challenge}
                     onChange={(e) => handleInputChange('educational_challenge', e.target.value)}
                     placeholder="למשל: קושי של תלמידים להתמיד בקריאת ספרים לאורך זמן."

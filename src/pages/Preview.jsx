@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,6 @@ import { createPageUrl } from "@/utils";
 import WelcomeStep from "../components/steps/WelcomeStep";
 import FamilyInfoStep from "../components/steps/FamilyInfoStep";
 import ProblemDefinitionStep from "../components/steps/ProblemDefinitionStep";
-import PedagogicalFrameworkStep from "../components/steps/PedagogicalFrameworkStep";
 import ActivityIdeaStep from "../components/steps/ActivityIdeaStep";
 import SolutionRefinementStep from "../components/steps/SolutionRefinementStep";
 import ActivityDescriptionStep from "../components/steps/ActivityDescriptionStep";
@@ -17,13 +15,16 @@ import PromptStep from "../components/steps/PromptStep";
 import FinalStep from "../components/steps/FinalStep";
 import ChatExport from "../components/chat/ChatExport";
 
+// 8 steps total (no pedagogical framework step)
+const MAIN_STEPS_DISPLAY = [1, 2, 3, 4, 5, 6]; // display indices for "מאתגר לפיתרון"
+
 export default function Preview() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showExport, setShowExport] = useState(false);
 
   const mockData = {
     family_name: "דנה כהן",
-    family_location: "בית ספר 'עתיד', תל אביב", 
+    family_location: "בית ספר 'עתיד', תל אביב",
     family_info: "מורה למדעים בחטיבת ביניים, ותק של 8 שנים.",
     educational_challenge: "קושי של תלמידים בכיתה ז' להבין מושגים מופשטים בכימיה, כמו מבנה האטום.",
     target_audience: "תלמידי כיתה ז'",
@@ -31,7 +32,7 @@ export default function Preview() {
     problem_causes: "הנושא מופשט וקשה להמחשה ויזואלית בכלים הקיימים.",
     problem_symptoms: "ציונים נמוכים במבחנים, חוסר השתתפות בשיעור.",
     assumptions: "אם תהיה דרך להמחיש את מבנה האטום באופן אינטראקטיבי, ההבנה והעניין יגברו.",
-    pedagogical_framework: "המסגרת הפדגוגית תתמקד בלמידה חווייתית ואינטראקטיבית (Experiential Learning) המאפשרת לתלמידים 'לשחק' עם מודלים, ובכך להפוך מושג מופשט לקונקרטי.",
+    pedagogical_framework: "",
     activity_idea: "סימולציה אינטראקטיבית לבניית אטומים.",
     agreed_solution: "אפליקציה המאפשרת לתלמידים לבנות אטומים של יסודות שונים על ידי גרירת פרוטונים, נויטרונים ואלקטרונים, ולקבל משוב מיידי על היציבות והמטען של האטום שיצרו.",
     activity_description: `איך זה עובד?: התלמיד בוחר יסוד מהטבלה המחזורית וצריך 'לבנות' אותו. הוא גורר חלקיקים לאזורים הנכונים באטום.
@@ -58,60 +59,31 @@ export default function Preview() {
 ### 🎨 עיצוב וחווית משתמש
 - עיצוב נקי ומדעי, בצבעי כחול, לבן ואפור.
 - פונט ברור וקריא (Assistant).
-- ממשק מלא בעברית עם תמיכת RTL.
-
-### ⚙️ דרישות טכניות
-- אפליקציה חד-עמודית (SPA).
-- ניהול מצב בתוך הסשן ללא צורך בשמירת נתונים.
-- רספונסיביות למובייל ודסקטופ.`
+- ממשק מלא בעברית עם תמיכת RTL.`
   };
 
-  const mockUser = {
-    full_name: "משתמש דמיוני",
-    email: "demo@example.com"
-  };
+  const mockUser = { full_name: "משתמש דמיוני", email: "demo@example.com" };
 
-  const handleStepChange = (step) => {
-    setCurrentStep(step);
-  };
-
-  const handleNext = () => {
-    if (currentStep < 9) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleShowExport = () => {
-    setShowExport(true);
-  };
+  const handleNext = () => { if (currentStep < 8) setCurrentStep(currentStep + 1); };
+  const handleBack = () => { if (currentStep > 1) setCurrentStep(currentStep - 1); };
 
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 1:
         return <WelcomeStep onNext={handleNext} />;
-      
       case 2:
         return (
           <FamilyInfoStep
-            onNext={handleNext}
-            isLoading={false}
+            onNext={handleNext} isLoading={false}
             defaultValue={mockData.family_info}
             defaultFamilyName={mockData.family_name}
             defaultLocation={mockData.family_location}
           />
         );
-      
       case 3:
         return (
           <ProblemDefinitionStep
-            onNext={handleNext}
-            isLoading={false}
+            onNext={handleNext} isLoading={false}
             defaultValues={{
               educational_challenge: mockData.educational_challenge,
               target_audience: mockData.target_audience,
@@ -122,16 +94,7 @@ export default function Preview() {
             }}
           />
         );
-
       case 4:
-        return (
-          <PedagogicalFrameworkStep
-            sessionData={mockData}
-            onNext={handleNext}
-          />
-        );
-
-      case 5:
         return (
           <ActivityIdeaStep
             onNext={handleNext}
@@ -140,16 +103,11 @@ export default function Preview() {
             defaultValue={mockData.activity_idea}
           />
         );
-      
-      case 6:
+      case 5:
         return (
-          <SolutionRefinementStep
-            sessionData={mockData}
-            onNext={handleNext}
-          />
+          <SolutionRefinementStep sessionData={mockData} onNext={handleNext} />
         );
-
-      case 7:
+      case 6:
         return (
           <ActivityDescriptionStep
             onNext={handleNext}
@@ -158,8 +116,7 @@ export default function Preview() {
             defaultValue={mockData.activity_description}
           />
         );
-      
-      case 8:
+      case 7:
         return (
           <PromptStep
             onNext={handleNext}
@@ -170,30 +127,23 @@ export default function Preview() {
             defaultValue={mockData.final_prompt}
           />
         );
-      
-      case 9:
+      case 8:
       default:
-        return (
-          <FinalStep
-            sessionData={mockData}
-          />
-        );
+        return <FinalStep sessionData={mockData} />;
     }
   };
 
   if (showExport) {
-    return (
-      <ChatExport 
-        sessionData={mockData}
-        onBack={() => setShowExport(false)}
-        currentUser={mockUser}
-      />
-    );
+    return <ChatExport sessionData={mockData} onBack={() => setShowExport(false)} currentUser={mockUser} />;
   }
 
+  const isMainSection = currentStep >= 1 && currentStep <= 6;
+  const isPromptSection = currentStep === 7;
+  const isFinalSection = currentStep === 8;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-blue-50">
-      <div className="bg-blue-200 text-blue-800 p-2 text-center text-sm flex items-center justify-center gap-2" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-blue-50" dir="rtl">
+      <div className="bg-blue-200 text-blue-800 p-2 text-center text-sm flex items-center justify-center gap-2">
         <Eye className="w-4 h-4" />
         מצב תצוגה מקדימה - נתונים דמיוניים לבדיקת העיצוב והחוויה
         <Link to={createPageUrl('Admin')} className="underline font-semibold">
@@ -207,44 +157,26 @@ export default function Preview() {
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex gap-2 items-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleBack}
-                  disabled={currentStep === 1}
-                  className="flex items-center gap-2"
-                >
+                <Button variant="outline" size="sm" onClick={handleBack} disabled={currentStep === 1} className="flex items-center gap-2">
                   <Undo2 className="w-4 h-4" />
                   <span>חזור</span>
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNext}
-                  disabled={currentStep === 9}
-                  className="flex items-center gap-2"
-                >
+                <Button variant="outline" size="sm" onClick={handleNext} disabled={currentStep === 8} className="flex items-center gap-2">
                   <ChevronRight className="w-4 h-4" />
                   <span>הבא</span>
                 </Button>
               </div>
 
               <div className="flex flex-col gap-3 items-end">
-                {/* מאתגר לפיתרון - רק שלבים 1-7 */}
-                {currentStep <= 7 && (
+                {isMainSection && (
                   <div className="flex flex-col items-end gap-1">
                     <span className="text-xs font-semibold text-gray-600">מאתגר לפיתרון</span>
                     <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5, 6, 7].map((step) => (
-                        <button
-                          key={step}
-                          onClick={() => handleStepChange(step)}
+                      {MAIN_STEPS_DISPLAY.map((step) => (
+                        <button key={step} onClick={() => setCurrentStep(step)}
                           className={`w-7 h-7 rounded-full text-xs font-medium transition-all duration-300 ${
-                            step === currentStep
-                              ? "bg-orange-500 text-white"
-                              : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                          }`}
-                        >
+                            step === currentStep ? "bg-orange-500 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                          }`}>
                           {step}
                         </button>
                       ))}
@@ -252,52 +184,37 @@ export default function Preview() {
                   </div>
                 )}
 
-                {/* פרומפט סופי - רק שלב 8 */}
-                {currentStep === 8 && (
+                {isPromptSection && (
                   <div className="flex flex-col items-end gap-1">
                     <span className="text-xs font-semibold text-gray-600">פרומפט סופי</span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => handleStepChange(8)}
-                        className="w-16 h-7 rounded-full text-xs font-medium bg-orange-500 text-white transition-all duration-300"
-                      >
-                        8
-                      </button>
-                    </div>
+                    <button onClick={() => setCurrentStep(7)}
+                      className="w-16 h-7 rounded-full text-xs font-medium bg-orange-500 text-white">7</button>
                   </div>
                 )}
 
-                {/* מוכנים לשיגור - רק שלב 9 */}
-                {currentStep === 9 && (
+                {isFinalSection && (
                   <div className="flex flex-col items-end gap-1">
                     <span className="text-xs font-semibold text-gray-600">מוכנים לשיגור</span>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => handleStepChange(9)}
-                        className="w-16 h-7 rounded-full text-xs font-medium bg-green-500 text-white transition-all duration-300"
-                      >
-                        9
-                      </button>
-                    </div>
+                    <button onClick={() => setCurrentStep(8)}
+                      className="w-16 h-7 rounded-full text-xs font-medium bg-green-500 text-white">8</button>
                   </div>
                 )}
               </div>
             </div>
 
             <div className="text-center mb-4">
-              <div className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500">
                 {currentStep === 1 && "שלב 1: פתיחה"}
                 {currentStep === 2 && "שלב 2: היכרות"}
                 {currentStep === 3 && "שלב 3: הגדרת הבעיה"}
-                {currentStep === 4 && "שלב 4: מסגרת פדגוגית"}
-                {currentStep === 5 && "שלב 5: כיוון לפתרון"}
-                {currentStep === 6 && "שלב 6: ניסוח הפתרון"}
-                {currentStep === 7 && "שלב 7: אפיון הפתרון"}
-                {currentStep === 8 && "שלב 8: יצירת פרומפט"}
-                {currentStep === 9 && "שלב 9: סיכום"}
-              </div>
+                {currentStep === 4 && "שלב 4: כיוון לפתרון"}
+                {currentStep === 5 && "שלב 5: ניסוח הפתרון"}
+                {currentStep === 6 && "שלב 6: אפיון הפתרון"}
+                {currentStep === 7 && "שלב 7: יצירת פרומפט"}
+                {currentStep === 8 && "שלב 8: סיכום"}
+              </span>
             </div>
-            
+
             <AnimatePresence mode="wait">
               <div key={currentStep}>
                 {renderCurrentStep()}
