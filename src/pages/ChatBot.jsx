@@ -84,37 +84,11 @@ export default function ChatBot() {
   };
 
   const loadOrCreateSessionForUser = async (userEmail) => {
-    const sessions = await ChatSession.filter(
-      { user_email: userEmail, is_complete: false },
-      "-created_date", 1
-    );
-    if (sessions.length > 0) {
-      const session = sessions[0];
-      setSessionData(session);
-      const step = session.step === 4 ? 5 : session.step;
-      setCurrentStep(step);
-      setSessionId(session.id);
-    } else {
-      await createNewSession(userEmail);
-    }
+    await createNewSession(userEmail);
   };
 
   const loadOrCreateSessionForAnonymous = async () => {
-    const storedSessionId = localStorage.getItem('chatSessionId');
-    if (storedSessionId) {
-      try {
-        const session = await ChatSession.get(storedSessionId);
-        if (session && !session.is_complete) {
-          setSessionData(session);
-          const step = session.step === 4 ? 5 : session.step;
-          setCurrentStep(step);
-          setSessionId(session.id);
-          return;
-        }
-      } catch (e) {
-        console.warn("Could not load session from localStorage");
-      }
-    }
+    localStorage.removeItem('chatSessionId');
     await createNewSession('anonymous');
   };
 
