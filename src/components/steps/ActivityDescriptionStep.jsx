@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Target, Users, Zap, AlertCircle, Play, Palette, MousePointer, BookOpen } from "lucide-react";
@@ -8,17 +7,18 @@ import { Loader2, Send } from "lucide-react";
 import ChatMessage from "../chat/ChatMessage";
 
 const FormSection = ({ icon, title, description, value, onChange, placeholder }) => (
-    <div className="space-y-2">
-        <label className="font-semibold text-cet-text-primary flex items-center gap-2">
+    <div className="space-y-2" dir="rtl">
+        <label className="font-semibold text-cet-text-primary flex items-center gap-2 text-right">
             {icon}
             {title}
         </label>
-        {description && <p className="text-sm text-cet-text-secondary">{description}</p>}
+        {description && <p className="text-sm text-cet-text-secondary text-right">{description}</p>}
         <Textarea
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className="w-full h-24 resize-y"
+            className="w-full h-24 resize-y text-right"
+            dir="rtl"
         />
     </div>
 );
@@ -65,14 +65,28 @@ export default function ActivityDescriptionStep({ onNext, activityIdea, isLoadin
   };
 
   const buildFullDescription = () => {
-    // generalDescription line removed
-    return `איך זה עובד?: ${formData.gameRules || 'לא צוין'}
-קהל יעד ומשתמשים: ${formData.roles || 'לא צוין'}
-מבנה האפליקציה (מסכים): ${formData.gameSteps || 'לא צוין'}
-פיצ'רים מגניבים (גיימיפיקציה): ${formData.gameElements || 'לא צוין'}
-כפתורים ופעולות מרכזיות: ${formData.importantButtons || 'לא צוין'}
-עיצוב ואווירה (Vibe): ${formData.designStyle || 'לא צוין'}
-הערות נוספות: ${formData.additionalInstructions || 'לא צוין'}`;
+    return `## Mini PRD – ${activityIdea}
+
+### 🎯 מה האפליקציה עושה?
+${formData.gameRules || 'לא צוין'}
+
+### 👥 למי זה מיועד?
+${formData.roles || 'לא צוין'}
+
+### 🗂️ מבנה ומסכים
+${formData.gameSteps || 'לא צוין'}
+
+### ✨ פיצ'רים מיוחדים
+${formData.gameElements || 'לא צוין'}
+
+### 🖱️ פעולות וכפתורים מרכזיים
+${formData.importantButtons || 'לא צוין'}
+
+### 🎨 עיצוב ואווירה
+${formData.designStyle || 'לא צוין'}
+
+### 📝 הערות נוספות
+${formData.additionalInstructions || 'לא צוין'}`;
   };
 
   const handleSubmit = async () => {
@@ -87,7 +101,7 @@ export default function ActivityDescriptionStep({ onNext, activityIdea, isLoadin
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6" dir="rtl">
       <ChatMessage message={`פתרון מעולה! "${activityIdea}" נשמע מבטיח. עכשיו בואו נפרט אותו כדי שנוכל לבנות את האפליקציה.`} isBot={true} />
 
       <div className="bg-sky-50 rounded-lg p-4 text-sm flex items-start gap-3">

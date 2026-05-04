@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Loader2, Sparkles, CheckCircle, Rocket } from "lucide-react";
+import { Copy, Loader2, CheckCircle, Rocket } from "lucide-react";
 import { InvokeLLM } from "@/integrations/Core";
 import { Button } from "@/components/ui/button";
 
@@ -11,41 +11,58 @@ export default function PromptStep({ onSave, activityIdea, activityDescription, 
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (defaultValue) setFinalPrompt(defaultValue);
-  }, [defaultValue]);
+    if (defaultValue) {
+      setFinalPrompt(defaultValue);
+    } else if (activityDescription) {
+      generatePrompt();
+    }
+  }, []);
 
   const generatePrompt = async () => {
     setIsGenerating(true);
     const metaPrompt = `
-      You are an expert prompt engineer for an AI application builder.
-      Generate a detailed Hebrew prompt to build a web application based on:
-      1. Solution Idea: ${activityIdea}
-      2. Solution Description: ${activityDescription}
+You are a senior product manager writing a mini-PRD for an AI-powered no-code app builder.
+Based on the following product brief, write a clear, inspiring mini-PRD in HEBREW that helps a developer or AI tool envision and build the product.
 
-      Create a cohesive prompt in Hebrew with markdown headers:
+The document should be practical, visual, and human — NOT a business document. Focus on the user experience and product behavior.
 
-      ### 💡 הרעיון המרכזי ותיאור הפתרון
-      - Title: "${activityIdea}"
-      - Full description: "${activityDescription}"
+--- PRODUCT BRIEF ---
+Solution Idea: ${activityIdea}
+Description:
+${activityDescription}
+--- END BRIEF ---
 
-      ### 📝 שם האפליקציה וקונספט
-      - Suggest a professional name and concept.
+Write the mini-PRD in Hebrew with this EXACT structure:
 
-      ### 🎯 מטרת האפליקציה
-      - Main goal.
+## 🚀 [שם האפליקציה] – מסמך מוצר (Mini PRD)
 
-      ### ✨ תכונות ופיצ'רים מרכזיים
-      - Specific actionable features from the description.
-      - Single-device usage, no registration required.
+### 🎯 חזון המוצר
+[One compelling sentence that describes what this app is and why it matters. Think: "elevator pitch".]
 
-      ### 🎨 עיצוב וחווית משתמש
-      - Clean, modern design. Blues (#0073C4, #00A9E0), light background.
-      - Hebrew font (Assistant/Heebo), full RTL support, responsive.
+### 👤 המשתמש המרכזי
+[Who uses this? What are they trying to achieve? What frustrates them today?]
 
-      ### ⚙️ דרישות טכניות
-      - Single-page app, session-based data only.
+### 📱 תיאור חוויית המשתמש
+[Walk through the app experience step by step, as if you're watching someone use it. Describe screens, actions, and how it feels.]
 
-      Output ONLY the Hebrew prompt, no extra text.
+### 🗂️ מסכים ופונקציונליות
+[List each screen/view with a short description of what happens there. Use bullet points.]
+
+### ✨ פיצ'רים מרכזיים
+[The 4-6 key features that make this product work. Keep it concrete.]
+
+### 🎨 עיצוב ואווירה
+[Visual style, color mood, tone of voice. Help the builder picture it.]
+
+### ⚙️ דרישות טכניות
+- אפליקציית דף יחיד (SPA)
+- עברית מלאה ותמיכה ב-RTL
+- רספונסיבי (מובייל ודסקטופ)
+- ללא הרשמה / התחברות
+- נתונים מנוהלים בתוך הסשן
+[Add any additional technical notes from the brief.]
+
+Output ONLY the Hebrew mini-PRD. No extra commentary.
     `;
     const generated = await InvokeLLM({ prompt: metaPrompt });
     setFinalPrompt(generated);
@@ -66,19 +83,7 @@ export default function PromptStep({ onSave, activityIdea, activityDescription, 
         <h2 className="text-2xl font-bold gradient-text">הפרומפט הסופי ✨</h2>
       </div>
 
-      {!finalPrompt && !isGenerating && (
-        <div className="text-center space-y-6 py-8">
-          <p className="text-xl font-semibold text-gray-700">רוצים לקבל פרומפט לבניית האפליקציה?</p>
-          <Button
-            onClick={generatePrompt}
-            size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold px-10 py-6 rounded-xl shadow-lg"
-          >
-            <Sparkles className="w-5 h-5 ml-2" />
-            כן! צרו את הפרומפט
-          </Button>
-        </div>
-      )}
+
 
       {isGenerating && (
         <div className="text-center py-16 space-y-4">
