@@ -57,13 +57,13 @@ export default function ProblemDefinitionStep({ onNext, isLoading, defaultValues
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            <ChatMessage message="שלב מצוין! עכשיו בואו נגדיר יחד את האתגר החינוכי. ככל שתהיו מדויקים יותר, הפתרון יהיה טוב יותר." isBot={true} />
+            <ChatMessage message="שלב מצוין! עכשיו בואו נגדיר יחד את האתגר. ככל שתהיו מדויקים יותר, הפתרון יהיה טוב יותר." isBot={true} />
 
             <div className="space-y-6 bg-white p-6 rounded-lg border">
                 <FormSection
                     icon={<Edit3 className="w-5 h-5 text-cet-primary-blue" />}
-                    title="א. אתגר חינוכי / אתגר שמעסיק אתכם"
-                    description="תארו קושי, אתגר או כאב מתחום החינוך והלמידה — יכול להיות אתגר של מורה, של תלמיד, או כל אתגר שמעסיק אתכם."
+                    title="א. האתגר שמעסיק אתכם"
+                    description="תארו קושי, אתגר או כאב — יכול להיות מכל תחום ועניין שמעסיק אתכם."
                     value={formData.educational_challenge}
                     onChange={(e) => handleInputChange('educational_challenge', e.target.value)}
                     placeholder="למשל: קושי של תלמידים להתמיד בקריאת ספרים לאורך זמן."
